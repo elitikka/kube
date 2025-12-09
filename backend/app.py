@@ -12,10 +12,15 @@ def get_db_connection():
         database=os.getenv('DB_NAME')
     )
 
-@app.route('/api/health')
+@app.route("/api/health")
 def health():
-    return jsonify({"status": "healthy"})
-
+  try:
+    connection = get_db_connection()
+    connection.close()
+    return jsonify({ "status": "healthy", "db": "healthy" })
+  except Exception as e:
+    return jsonify({ "status": "Failed", "db": f"error: {e}"}), 500 # Muokattu, jotta mahdolliset virheet näkyy
+  
 @app.route('/api/users')
 def get_users():
     try:
