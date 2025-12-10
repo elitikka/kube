@@ -67,16 +67,13 @@ def add_user():
       conn = get_db_connection()
       cursor = conn.cursor()
       # Lisää tietokantaan käyttäjä annetulla nimellä ja säpöllä
-      cursor.execute("""
-                     INSERT INTO users (name, email) VALUES
-                     (%s, %s)', (name, email)
-                     """)
+      cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
       conn.commit()
       cursor.close()
       conn.close()
       return jsonify({"message": "User added succesfully"})
    except Exception as e:
-      return jsonify({"error": str(e)}), 500
+      return jsonify({ "status": "Failed", "adduser": f"error: {e}"}), 500
 
 
 if __name__ == '__main__':
