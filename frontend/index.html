@@ -31,6 +31,20 @@
         button:hover {
             background: #0056b3;
         }
+        #addUserSection {
+            display: none;
+            margin-top: 20px;
+        }
+        input {
+            margin: 5px;
+            padding: 8px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
         #result {
             margin-top: 20px;
             padding: 15px;
@@ -50,6 +64,14 @@
             <button onclick="checkHealth()">Check Backend Health</button>
             <button onclick="initDB()">Initialize Database</button>
             <button onclick="getUsers()">Get Users</button>
+            <button onclick="toggleAddUser()">Add User</button>
+        </div>
+
+        <div id="addUserSection">
+            <input id="userName" type="text" placeholder="Name">
+            <input id="userEmail" type="email" placeholder="Email">
+            <button onclick="addUser()">Add</button>
+            <div id="errorMessage" class="error"></div>
         </div>
 
         <div id="result"></div>
@@ -58,6 +80,7 @@
     <script>
         const resultDiv = document.getElementById('result');
         const serverInfo = document.getElementById('serverInfo');
+        const errorMsg = document.getElementById('errorMessage');
         serverInfo.textContent = window.location.href;
 
         async function checkHealth() {
@@ -89,6 +112,47 @@
                 resultDiv.textContent = 'Error: ' + error.message;
             }
         }
+
+        // Käyttäjän lisäysominaisuus ja siihen liittyvät muut jutut:
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function toggleAddUser() {
+            const section = document.getElementById('addUserSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            errorMessage.textContent = "";
+        }
+
+        async function addUser() {
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+
+            if (!name) {
+                errorMessage.textContent = "Name cannot be empty.";
+                return;
+            }
+            if (!isValidEmail(email)) {
+                errorMessage.textContent = "Invalid email address.";
+                return;
+            }
+            errorMessage.textContent = ""; // Tyhjennä errorit
+
+            try {
+                const response = await fetch('api/add-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email })
+                });
+
+                const data = await response.json();
+                resultDiv.textContent = 'Add User: ' + JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        }
     </script>
+
 </body>
 </html>

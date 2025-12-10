@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import mysql.connector
 import os
 
@@ -57,6 +57,27 @@ def init_db():
         return jsonify({"message": "Database initialized"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/api/add-user', methods=['POST']) # Lisätty ominaisuus: Lisää käyttäjä
+def add_user():
+   try:
+      data = request.get_json() # Hae Frontendistä annettu tieto (nimi ja säpö)
+      name = data.get("name")
+      email = data.get("email")
+      conn = get_db_connection()
+      cursor = conn.cursor()
+      # Lisää tietokantaan käyttäjä annetulla nimellä ja säpöllä
+      cursor.execute("""
+                     INSERT INTO users (name, email) VALUES
+                     (%s, %s)', (name, email)
+                     """)
+      conn.commit()
+      cursor.close()
+      conn.close()
+      return jsonify({"message": "User added succesfully"})
+   except Exception as e:
+      return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
